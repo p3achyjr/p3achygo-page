@@ -1,5 +1,3 @@
-# p3achygo
-
 Current Run: v3 (8-15-2023 - Ongoing)
 
 Games Played: 870,000
