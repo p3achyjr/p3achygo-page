@@ -1,10 +1,9 @@
 ---
 layout: page
-title: Methods
 permalink: /methods/
 ---
 
-## Overview
+## Methods
 
 This is a survey of methods implemented in p3achygo. I'm assuming a bit of background in the problem space, so I apologize if there are parts that are confusing. Also for brevity, I will use AlphaZero to mean AlphaGo Zero even though they are different.
 
