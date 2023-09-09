@@ -1,7 +1,8 @@
 title: "p3achygo"
+theme: "minima"
 
 # description: >
 #   Webpage for p3achygo, an AlphaZero reproduction.
 
-# header_pages:
-#   - methods.md
+header_pages:
+  - methods.md
