@@ -7,4 +7,4 @@ description: >
 header_pages:
   - methods.md
 
-markdown: kramdown
+# markdown: kramdown
