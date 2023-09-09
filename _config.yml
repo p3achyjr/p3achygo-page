@@ -7,5 +7,4 @@ description: >
   Webpage for p3achygo, an AlphaZero reproduction.
 
 header_pages:
-  methods.md
-  
+  - methods.md
