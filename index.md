@@ -1,3 +1,6 @@
+---
+---
+
 ## Overview
 
 [p3achygo](https://github.com/p3achyjr/p3achygo) is a AlphaZero-based Go engine, able to reach 5-6D after playing 500k games, for about a week of training time on an A100. The most recent run is currently ongoing. I have not currently made models/SGFs public, nor have I integrated with GTP protocols. These should all be coming soon :).
