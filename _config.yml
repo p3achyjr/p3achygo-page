@@ -1,2 +1,11 @@
 title: "p3achygo"
-theme: minima
+author:
+  name: Anatol Liu
+  email: anatolxliu@gmail.com
+
+description: >
+  Webpage for p3achygo, an AlphaZero reproduction.
+
+header_pages:
+  methods.md
+  
