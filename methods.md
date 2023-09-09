@@ -15,7 +15,7 @@ In the original AlphaZero, and in open source reproductions, the search algorith
 $$U(s, a) = c_{puct}P(s, a)\frac{\sum_bN(s, b)}{1 + N(s, a)}$$
 $$a_{\text{next}} = max_a(Q(s, a) + U(s, a))$$
 
-where $s$ is a given game state, $a$ is a given action, $P(s, a)$ is a prior mass for selecting action $a$ from $s$, $Q(s, a)$ is the current measured value for taking action $a$, and $N(s, a)$ is the current visit count for $a$ from $s$. In AlphaZero, $P(s, a)$ is a probability mass function over $a$ given by our neural network.
+where $$s$$ is a given game state, $$a$$ is a given action, $$P(s, a)$$ is a prior mass for selecting action $$a$$ from $$s$$, $$Q(s, a)$$ is the current measured value for taking action $$a$$, and $$N(s, a)$$ is the current visit count for $$a$$ from $$s$$. In AlphaZero, $$P(s, a)$$ is a probability mass function over $a$ given by our neural network.
 
 This algorithm has worked for Deepmind, Leela, Katago, Minigo, among others. However, the algorithm has a few issues:
 
@@ -26,13 +26,13 @@ This algorithm has worked for Deepmind, Leela, Katago, Minigo, among others. How
 
 In 2020, Ivo Danihelka et. al. published [_Policy Improvement By Planning With Gumbel_](https://openreview.net/pdf?id=bERaNdoegnO), which introduced Gumbel MCTS and addressed the above listed issues. Very roughly, the idea is:
 
-- Sample $k$ actions at the root.
-- Find Q-values for each of the $k$ actions.
-- Use $\sigma(Q_a)$ as logits for a policy probability distribution for the current root, where $\sigma$ is a monotonically increasing function.
+- Sample $$k$$ actions at the root.
+- Find Q-values for each of the $$k$$ actions.
+- Use $$\sigma(Q_a)$$ as logits for a policy probability distribution for the current root, where $$\sigma$$ is a monotonically increasing function.
 
 This is _very_ rough and even a little inaccurate. The paper is relatively short and contains all the details :).
 
-Forcing search to sample $k$ actions bakes exploration into the algorithm and removes the need for Dirichlet noise. Moreover, the sampling is guided by the current policy, and we are unlikely to insert noise into unpromising board locations. Additionally, because we use the Q-values to produce our training target, we are less likely to have the policy sharpely converge on two relatively equal actions, and we have more room to update our policy as our value function improves. Most strikingly, Gumbel MCTS guarantees a policy improvement in expectation, relative the the net's current value prediction. A proof is in the paper as well.
+Forcing search to sample $$k$$ actions bakes exploration into the algorithm and removes the need for Dirichlet noise. Moreover, the sampling is guided by the current policy, and we are unlikely to insert noise into unpromising board locations. Additionally, because we use the Q-values to produce our training target, we are less likely to have the policy sharpely converge on two relatively equal actions, and we have more room to update our policy as our value function improves. Most strikingly, Gumbel MCTS guarantees a policy improvement in expectation, relative the the net's current value prediction. A proof is in the paper as well.
 
 I use 64 visits for MCTS at the beginning of training, and gradually grow this value to 448. This is in contrast to reproductions that use visit counts in the high hundreds to low thousands.
 
@@ -44,7 +44,7 @@ These are new neural network blocks used in the Gumbel paper.
 
 For background: the architecture for AlphaZero networks usually contain a _trunk_ of n blocks. Most of these blocks are convolutional, with optional intra-channel mixing blocks scattered in between.
 
-Bottleneck blocks are an alternative type of convolutional block. A typical convolutional block contains $c$ filters, and consists of 2 x (Convolution, ReLU, and BatchNorm) blocks stacked on top of each other. A bottleneck block instead consists of a 1x1 convolution from $c$ to $c_{btl}$ channels, followed by $k$ convolutions with $c_{btl}$ channels, before a final 1x1 convolution back to $c$ channels. In my implementation, each convolution contains an associated ReLU and BatchNorm, but these may not be totally necessary.
+Bottleneck blocks are an alternative type of convolutional block. A typical convolutional block contains $$c$$ filters, and consists of 2 x (Convolution, ReLU, and BatchNorm) blocks stacked on top of each other. A bottleneck block instead consists of a 1x1 convolution from $$c$$ to $$c_{btl}$$ channels, followed by $$k$$ convolutions with $$c_{btl}$$ channels, before a final 1x1 convolution back to $$c$$ channels. In my implementation, each convolution contains an associated ReLU and BatchNorm, but these may not be totally necessary.
 
 Empirically, bottleneck blocks help with learning efficiency. The most recent Katago models use bottleneck blocks in their architecture.
 
