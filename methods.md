@@ -1,7 +1,7 @@
 ---
 layout: page
 permalink: /methods/
-katex: True
+usemathjax: true
 ---
 
 ## Methods

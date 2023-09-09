@@ -7,5 +7,4 @@ theme: "minima"
 header_pages:
   - methods.md
 
-kramdown:
-  math_engine: katex
+markdown: kramdown
