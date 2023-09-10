@@ -4,7 +4,7 @@ title: Methods
 permalink: /methods/
 ---
 
-This is a survey of methods implemented in p3achygo. I'm assuming a bit of background in the problem space, so I apologize if there are parts that are confusing. Also for brevity, I will use AlphaZero to mean AlphaGo Zero even though they are different.
+These are some of the main methods implemented in p3achygo. I'm assuming a bit of background, so I apologize if there are parts that are confusing. Also for brevity, I will use AlphaZero to mean AlphaGo Zero even though they are different.
 
 ## Gumbel MCTS
 
@@ -13,6 +13,7 @@ This is a new MCTS algorithm that works well even for very low visit counts. Thi
 In the original AlphaZero, and in open source reproductions, the search algorithm has used some variant of the PUCT algorithm to determine which node to select at each non-leaf node. The PUCT formula is as follows:
 
 $$U(s, a) = c_{puct}P(s, a)\frac{\sum_bN(s, b)}{1 + N(s, a)}$$
+
 $$a_{\text{next}} = max_a(Q(s, a) + U(s, a))$$
 
 where $$s$$ is a given game state, $$a$$ is a given action, $$P(s, a)$$ is a prior mass for selecting action $$a$$ from $$s$$, $$Q(s, a)$$ is the current measured value for taking action $$a$$, and $$N(s, a)$$ is the current visit count for $$a$$ from $$s$$. In AlphaZero, $$P(s, a)$$ is a probability mass function over $a$ given by our neural network.
@@ -20,7 +21,7 @@ where $$s$$ is a given game state, $$a$$ is a given action, $$P(s, a)$$ is a pri
 This algorithm has worked for Deepmind, Leela, Katago, Minigo, among others. However, the algorithm has a few issues:
 
 - Rapid Policy Convergence. With PUCT, if there are two actions with slightly different value estimates, PUCT will _always_ choose the one that is slightly stronger to visit. This leads to MCTS strongly preferring one move over another, even if their values don't reflect that disparity. This can become especially troublesome if the policy converges quickly in early training, before the net has had time to learn a good value function. See [link](https://github.com/leela-zero/leela-zero/issues/2230) and [link](https://github.com/CuriosAI/sai/issues/8) for more discussion.
-- Inadequate exploration. With vanilla PUCT, the algorithm will _always_ choose the move with the highest prior to explore first. Depending on $c_{puct}$ and how $Q(s, a)$ is initialized, it may take a while for MCTS to even try a different move. AlphaZero and reproductions use Dirichlet noise at the root node of each search to try to mitigate this issue, but the center of the noise is randomly chosen, and may not always reflect a good area to search.
+- Inadequate exploration. With vanilla PUCT, the algorithm will _always_ choose the move with the highest prior to explore first. Depending on $$c_{puct}$$ and how $$Q(s, a)$$ is initialized, it may take a while for MCTS to even try a different move. AlphaZero and reproductions use Dirichlet noise at the root node of each search to try to mitigate this issue, but the center of the noise is randomly chosen, and may not always reflect a good area to search.
 - Low accuracy at low visit counts. After MCTS is done, reproductions usually take either the visited counts as an empirical probability distribution, or the move with the most visits as the policy training target. If visits are too low, MCTS may not have enough time to converge on the best move, perhaps having spent many visits on a single move as a result of the PUCT formula. Even at higher visit counts, this is a problem. At inference time, Leela Zero currently selects the move with the highest LCB Q-value to mitigate this ([link](https://github.com/leela-zero/leela-zero/pull/2290)).
 - Policy Improvement is not guaranteed. For a hand-wavey demonstration: if we have three actions with prior [.5, .4, .1], values [0, 0, 1], and a visit budget of 2, we are guaranteed to visit action 0 first, and are likely to visit either action 0 or 1 for our second visit. Thus, the final training target would not contain action 2, the true best move.
 
@@ -60,8 +61,18 @@ Playout Cap Randomization addresses this by doing the following: instead of reco
 
 A nice effect of this is that we can use a higher per-sample reuse factor--whereas early versions of Minigo has a reuse factor of ~.6, Katago has a reuse factor of 4. In my case, my reuse factor is slightly over 4 with few issues with value overfitting.
 
+## Auxiliary Input Planes and Training Targets
+
+This is also pulled from Katago, and one that helps most reinforcement learning algorithms. Essentially, the more information you give your model, the quicker and more reliably it can learn. In distributional reinforcement learning, one theory for why learning value distributions helps with learning is that value distributions are a higher-fidelity representation of the value space, and serve as helpful auxiliary targets for the model to learn.
+
+Specifically, the auxiliary targets I include are: next opponent move, board ownership, score, and calculated online q-values at lookahead 6, 16, and 50 moves. For auxiliary input planes, I just include planes for groups with 1, 2, and 3 liberties. Including these input planes seems to help the model learn ladders.
+
+All the credit for this should go to dwu, the author of Katago.
+
 ## Go Exploit Buffer
 
 This is the core idea in [Targeted Search Control in AlphaZero for Effective Policy Improvement](https://arxiv.org/pdf/2302.12359.pdf).
 
 The idea is to keep a buffer of previously-visited positions, and start games from these positions with some probability. Doing so changes the distribution of states visited, and increases the number of unique states visited throughout self-play.
+
+I haven't measured whether this improves training, but it felt straightforward enough that I felt there was no reason not to add it :)
