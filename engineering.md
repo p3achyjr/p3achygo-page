@@ -19,7 +19,7 @@ Rather than storing all previous positions and searching for a match every time,
 - For an n x n board with m pieces per board intersection, generate n * n * (m + 1) random bitstrings. The (+ 1) term is to account for empty intersections.
 - For each board coordinate (i, j) and piece p, map the tuple (i, j, p) to a unique bitstring.
 - At game start, calculate the board's initial hash by xor'ing all empty bitstring values together. So essentially xor the bistrings at (i, j, EMPTY) for all (i, j). We can call this value _H_.
-- For each move, figure out the transitions on the board the move incurs. In Go, this will flip one intersection from EMPTY to (BLACK | WHITE), and some number of intersections from (BLACK | WHITE) to EMPTY for captured stones.
+- For each move, figure out the transitions on the board the move incurs. In Go, this will flip one intersection from EMPTY to (BLACK \| WHITE), and some number of intersections from (BLACK \| WHITE) to EMPTY for captured stones.
 - For each transition (i, j, p0, p1), xor the bitstrings at (i, j, p0) and (i, j, p1) with _H_. Since xor'ing any value with itself is 0 and xor is associative/commutative, the first xor is essentially "undoing" the last transition in this intersection. The second xor then "commits" the current piece to the intersection.
 
 And that's it! After we compute zobrist hashes like this, all we need to do is shove our hashes into a hash table. In my case, I generate bitstrings of length 128. I don't think I've seen any hash collisions yet :)
@@ -44,7 +44,7 @@ The most important part of the AlphaZero pipeline is being able to generate exam
 
 ### Concurrent Self-Play Thread Pool
 
-To enable maximum throughput, I implemented a concurrent self-play threads pool. Essentially, we have _n_ threads in parallel, each player a game and using MCTS. All threads share a common neural network input buffer, and load their inputs independently into an assigned slot in the buffer. When all threads have finished loading their data, or after a certain timeout, we send the buffer to the neural network, and threads copy their results back to a thread-local buffer.
+To enable maximum throughput, I implemented a concurrent self-play thread pool. Essentially, we have _n_ threads in parallel, each player a game and using MCTS. All threads share a common neural network input buffer, and load their inputs independently into an assigned slot in the buffer. When all threads have finished loading their data, or after a certain timeout, we send the buffer to the neural network, and threads copy their results back to a thread-local buffer.
 
 The most fun part about this was writing it in a way where minimal locking occurs. Unfortunately, trying to minimize locking also increased the number of race conditions I've had to deal with. Introducing the timeout also introduced some tricky race conditions, one of which I found just a few weeks ago at the time of writing this. Comes with the territory I suppose :)
 
