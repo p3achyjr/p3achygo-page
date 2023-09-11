@@ -4,6 +4,8 @@ title: Methods
 permalink: /methods/
 ---
 
+{:toc}
+
 These are some of the main methods implemented in p3achygo. I'm assuming a bit of background, so I apologize if there are parts that are confusing. Also for brevity, I will use AlphaZero to mean AlphaGo Zero even though they are different.
 
 ## Gumbel MCTS
@@ -36,8 +38,6 @@ This is _very_ rough and even a little inaccurate. The paper is relatively short
 Forcing search to sample $$k$$ actions bakes exploration into the algorithm and removes the need for Dirichlet noise. Moreover, the sampling is guided by the current policy, and we are unlikely to insert noise into unpromising board locations. Additionally, because we use the Q-values to produce our training target, we are less likely to have the policy sharpely converge on two relatively equal actions, and we have more room to update our policy as our value function improves. Most strikingly, Gumbel MCTS guarantees a policy improvement in expectation, relative the the net's current value prediction. A proof is in the paper as well.
 
 I use 64 visits for MCTS at the beginning of training, and gradually grow this value to 448. This is in contrast to reproductions that use visit counts in the high hundreds to low thousands.
-
-[Paper](https://openreview.net/pdf?id=bERaNdoegnO)
 
 ## Bottleneck and Broadcast Blocks
 
